@@ -4,7 +4,7 @@ metadata:
   name: nginx-app
   namespace: prod
 spec:
-  replicas: 2 # Cambiar a 5 en el directorio prod
+  replicas: 2  # Cambiar a 5 si es necesario
   selector:
     matchLabels:
       app: nginx
@@ -23,11 +23,11 @@ spec:
           mountPath: /usr/share/nginx/html
         - name: nginx-config
           mountPath: /etc/nginx/conf.d
-      env:
-      - name: POD_NAME
-        valueFrom:
-          fieldRef:
-            fieldPath: metadata.name
+        env:  # La sección de variables de entorno estaba mal indentada o configurada
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       volumes:
       - name: html-volume
         configMap:
@@ -43,7 +43,23 @@ metadata:
   namespace: prod
 data:
   index.html: |
-    <contenido de tu archivo index.html para prod>
+    <html>
+      <head>
+        <title>Ambiente Prod</title>
+      </head>
+      <body>
+        <h1>Bienvenido al Ambiente Prod</h1>
+        <p>Este pod está sirviendo la solicitud:</p>
+        <pre id="pod-name">Cargando...</pre>
+        <script>
+          fetch('/pod-info')
+            .then(response => response.json())
+            .then(data => {
+              document.getElementById('pod-name').textContent = data.pod_name;
+            });
+        </script>
+      </body>
+    </html>
 ---
 apiVersion: v1
 kind: ConfigMap
