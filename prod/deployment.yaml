@@ -4,7 +4,7 @@ metadata:
   name: nginx-app
   namespace: prod
 spec:
-  replicas: 2
+  replicas: 2 # Cambiar a 5 en el directorio prod
   selector:
     matchLabels:
       app: nginx
