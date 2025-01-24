@@ -43,23 +43,87 @@ metadata:
   namespace: dev
 data:
   index.html: |
-    <html>
-      <head>
-        <title>Ambiente Dev</title>
-      </head>
-      <body>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Ambiente Dev</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #f4f4f9;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+        }
+
+        h1 {
+          color: #333;
+          font-size: 2.5em;
+          margin-bottom: 10px;
+        }
+
+        p {
+          color: #666;
+          font-size: 1.2em;
+          margin-bottom: 20px;
+        }
+
+        pre {
+          background-color: #eef;
+          padding: 10px;
+          border-radius: 5px;
+          font-size: 1.1em;
+          color: #0056b3;
+          font-weight: bold;
+        }
+
+        footer {
+          margin-top: 30px;
+          font-size: 0.9em;
+          color: #999;
+        }
+
+        .container {
+          text-align: center;
+          max-width: 600px;
+          background-color: #fff;
+          border-radius: 10px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          padding: 20px;
+          box-sizing: border-box;
+        }
+
+        .version {
+          margin-top: 10px;
+          font-size: 0.9em;
+          color: #888;
+          font-weight: bold;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
         <h1>Bienvenido al Ambiente Dev</h1>
-        <p>Este pod esta sirviendo la solicitud:</p>
+        <p>Este pod está sirviendo la solicitud:</p>
         <pre id="pod-name">Cargando...</pre>
-        <script>
-          fetch('/pod-info')
-            .then(response => response.json())
-            .then(data => {
-              document.getElementById('pod-name').textContent = data.pod_name;
-            });
-        </script>
-      </body>
+        <footer class="version">Versión: v1.1.0</footer>
+      </div>
+      <script>
+        fetch('/pod-info')
+          .then(response => response.json())
+          .then(data => {
+            document.getElementById('pod-name').textContent = data.pod_name;
+          });
+      </script>
+    </body>
     </html>
+
 ---
 apiVersion: v1
 kind: ConfigMap
