@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ambiente Dev</title>
+</head>
+<body>
+    <h1>Bienvenido al Ambiente Dev</h1>
+    <p>Este pod está sirviendo la solicitud:</p>
+    <pre id="pod-name">Cargando...</pre>
+
+    <script>
+        fetch('/pod-info')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('pod-name').textContent = data.pod_name;
+            });
+    </script>
+</body>
+</html>

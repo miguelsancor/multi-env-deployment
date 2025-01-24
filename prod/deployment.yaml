@@ -2,9 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-app
-  namespace: dev # Cambiar a 'prod' en el directorio prod
+  namespace: prod
 spec:
-  replicas: 2 # Cambiar a 5 en el directorio prod
+  replicas: 2
   selector:
     matchLabels:
       app: nginx
@@ -19,8 +19,47 @@ spec:
         ports:
         - containerPort: 80
         volumeMounts:
-        - name: data-volume
-          mountPath: /data
+        - name: html-volume
+          mountPath: /usr/share/nginx/html
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d
+      env:
+      - name: POD_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.name
       volumes:
-      - name: data-volume
-        emptyDir: {}
+      - name: html-volume
+        configMap:
+          name: prod-html
+      - name: nginx-config
+        configMap:
+          name: nginx-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prod-html
+  namespace: prod
+data:
+  index.html: |
+    <contenido de tu archivo index.html para prod>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: prod
+data:
+  default.conf: |
+    server {
+        listen 80;
+        location / {
+            root /usr/share/nginx/html;
+            index index.html;
+        }
+        location /pod-info {
+            default_type application/json;
+            return 200 '{"pod_name":"$hostname"}';
+        }
+    }
