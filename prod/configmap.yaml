@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nginx-config
-  namespace: dev
+  namespace: prod  # Cambia 'dev' por 'prod' si este ConfigMap es para producción
 data:
-  environment: "development"
-  log_level: "debug"
+  environment: "production"  # Cambia 'development' por 'production'
+  log_level: "info"          # Usa un nivel de log apropiado para producción
