@@ -5,7 +5,7 @@ metadata:
   name: nginx-app-stable
   namespace: prod
 spec:
-  replicas: 0  # Número de réplicas para la versión estable
+  replicas: 3  # Número de réplicas para la versión estable
   selector:
     matchLabels:
       app: nginx
@@ -46,7 +46,7 @@ metadata:
   name: nginx-app-canary
   namespace: prod
 spec:
-  replicas: 3  # Inicialmente solo una réplica para la versión canary
+  replicas: 1  # Inicialmente solo una réplica para la versión canary
   selector:
     matchLabels:
       app: nginx
