@@ -1,21 +1,24 @@
+# Versión estable (v1.0.0)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-app
+  name: nginx-app-stable
   namespace: prod
 spec:
-  replicas: 2  # Cambiar a 5 si es necesario
+  replicas: 3  # Número de réplicas para la versión estable
   selector:
     matchLabels:
       app: nginx
+      version: stable  # Etiqueta para identificar la versión estable
   template:
     metadata:
       labels:
         app: nginx
+        version: stable  # Etiqueta específica para la versión estable
     spec:
       containers:
       - name: nginx
-        image: nginx:latest
+        image: nginx:1.0  # Imagen para la versión estable
         ports:
         - containerPort: 80
         volumeMounts:
@@ -23,7 +26,7 @@ spec:
           mountPath: /usr/share/nginx/html
         - name: nginx-config
           mountPath: /etc/nginx/conf.d
-        env:  # La sección de variables de entorno estaba mal indentada o configurada
+        env:
         - name: POD_NAME
           valueFrom:
             fieldRef:
@@ -31,59 +34,87 @@ spec:
       volumes:
       - name: html-volume
         configMap:
-          name: prod-html
+          name: prod-html-stable  # ConfigMap específico para la versión estable
       - name: nginx-config
         configMap:
           name: nginx-config
 ---
+# Versión Canary (v1.1.0)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-app-canary
+  namespace: prod
+spec:
+  replicas: 1  # Inicialmente solo una réplica para la versión canary
+  selector:
+    matchLabels:
+      app: nginx
+      version: canary  # Etiqueta para identificar la versión canary
+  template:
+    metadata:
+      labels:
+        app: nginx
+        version: canary  # Etiqueta específica para la versión canary
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.1  # Nueva imagen con cambios
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html-volume
+          mountPath: /usr/share/nginx/html
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+      volumes:
+      - name: html-volume
+        configMap:
+          name: prod-html-canary  # ConfigMap específico para la versión canary
+      - name: nginx-config
+        configMap:
+          name: nginx-config
+---
+# Servicio compartido entre stable y canary
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: prod
+spec:
+  selector:
+    app: nginx
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30008
+  type: NodePort
+---
+# ConfigMap para la versión estable
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: prod-html
+  name: prod-html-stable
   namespace: prod
 data:
   index.html: |
     <html>
       <head>
-        <title>Ambiente Prod</title>
+        <title>Ambiente Prod - Versión Estable</title>
         <style>
-          body {
-            font-family: Arial, sans-serif;
-            background-color: #2c3e50;
-            color: #ecf0f1;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-          }
-          h1 {
-            color: #e74c3c;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-          }
-          p {
-            font-size: 1.2rem;
-          }
-          pre {
-            font-size: 1rem;
-            color: #3498db;
-            background-color: #34495e;
-            padding: 10px;
-            border-radius: 5px;
-          }
-          footer {
-            position: absolute;
-            bottom: 10px;
-            font-size: 0.8rem;
-            color: #bdc3c7;
-          }
+          body { background-color: #2ecc71; color: #ffffff; font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+          h1 { color: #27ae60; }
         </style>
       </head>
       <body>
         <h1>Bienvenido al Ambiente Prod</h1>
+        <p>Esta es la versión <b>Estable</b>.</p>
         <p>Este pod está sirviendo la solicitud:</p>
         <pre id="pod-name">Cargando...</pre>
         <script>
@@ -93,25 +124,36 @@ data:
               document.getElementById('pod-name').textContent = data.pod_name;
             });
         </script>
-        <footer>Version: v1.0.0</footer>
       </body>
     </html>
 ---
+# ConfigMap para la versión Canary
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nginx-config
+  name: prod-html-canary
   namespace: prod
 data:
-  default.conf: |
-    server {
-        listen 80;
-        location / {
-            root /usr/share/nginx/html;
-            index index.html;
-        }
-        location /pod-info {
-            default_type application/json;
-            return 200 '{"pod_name":"$hostname"}';
-        }
-    }
+  index.html: |
+    <html>
+      <head>
+        <title>Ambiente Prod - Versión Canary</title>
+        <style>
+          body { background-color: #e74c3c; color: #ffffff; font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+          h1 { color: #c0392b; }
+        </style>
+      </head>
+      <body>
+        <h1>Bienvenido al Ambiente Prod</h1>
+        <p>Esta es la versión <b>Canary</b>.</p>
+        <p>Este pod está sirviendo la solicitud:</p>
+        <pre id="pod-name">Cargando...</pre>
+        <script>
+          fetch('/pod-info')
+            .then(response => response.json())
+            .then(data => {
+              document.getElementById('pod-name').textContent = data.pod_name;
+            });
+        </script>
+      </body>
+    </html>
