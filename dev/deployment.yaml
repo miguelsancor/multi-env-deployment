@@ -4,7 +4,7 @@ metadata:
   name: nginx-app
   namespace: dev
 spec:
-  replicas: 5  # Cambiar a 5 si es necesario
+  replicas: 2  # Cambiar a 5 si es necesario
   selector:
     matchLabels:
       app: nginx
